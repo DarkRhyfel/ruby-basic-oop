@@ -22,7 +22,12 @@ class Game
 
   def three_in_a_row(board)
     result = board.find { |row| row.uniq.length == 1 }
-    result || result[0] == ' ' ? nil : result[0]
+
+    if result
+      result[0] == ' ' ? nil : result[0]
+    else
+      result
+    end
   end
 
   def check_board_status
