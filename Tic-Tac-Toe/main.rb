@@ -15,6 +15,7 @@ class Main
     until game.check_board_status
       ask_player_input
       change_player
+      game.print_board
     end
 
     puts game.check_board_status
@@ -31,16 +32,19 @@ class Main
   end
 
   def ask_player_input
-    puts "Player #{@current_player} turn!"
+    loop do
+      puts "Player #{@current_player} turn!\n\n"
 
-    puts 'Please enter the row where you want to put your move:'
-    row = gets.chomp.to_i
+      puts 'Please enter the row where you want to put your move (1-2-3):'
+      row = gets.chomp.to_i
 
-    puts 'Please enter the column where you want to put your move:'
-    column = gets.chomp.to_i
+      puts 'Please enter the column where you want to put your move (1-2-3):'
+      column = gets.chomp.to_i
 
-    game.put_symbol_in_board(player_to_symbol, row, column)
-    game.print_board
+      break unless game.put_symbol_in_board(player_to_symbol, row - 1, column - 1) == 'Error'
+
+      puts "Sorry, that space is already taken. Use another please.\n\n"
+    end
   end
 end
 
