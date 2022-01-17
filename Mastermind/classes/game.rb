@@ -2,6 +2,8 @@
 
 require './modules/game_logic'
 require './resources/text_contents'
+require './classes/human_player'
+require './classes/computer_player'
 
 # Game class
 # Defines the methods to play a mastermind game
@@ -9,42 +11,50 @@ class Game
   include GameLogic
   include TextContents
 
-  attr_reader :code_selected
-
   def initialize
     @turns = TURNS
+    @human = HumanPlayer.new
+    @computer = ComputerPlayer.new
   end
 
   def play
     puts COMMON_MESSAGES[:welcome]
-    computer_maker
+    type = player_type
+
+    @code_selected = type == 1 ? @human.human_maker : @computer.computer_maker
 
     while @turns.positive?
-      break if play_turn
+      break if play_turn(type)
 
       @turns -= 1
     end
 
-    puts @turns.positive? ? RESULT_MESSAGES[:winner] : format(RESULT_MESSAGES[:loser], turns: TURNS)
+    print_result(type)
   end
 
-  def play_turn
-    puts COMMON_MESSAGES[:human_guess]
-    guess = gets.chomp.split(',').map(&:strip)
+  private
 
-    result = human_guess(guess)
-    puts format(COMMON_MESSAGES[:check_result], results: result)
+  def player_type
+    puts COMMON_MESSAGES[:type]
+    gets.chomp.to_i
+  end
+
+  def play_turn(type)
+    if type == 1
+      last_guess = @computer.computer_guess
+      result = @computer.computer_breaker(@code_selected, last_guess)
+    else
+      result = @human.human_breaker(@code_selected)
+    end
 
     result.all?('C')
   end
 
-  def computer_maker
-    @code_selected = CODE_PEG_COLORS.sample(4)
-  end
-
-  def human_guess(guess_colors)
-    code_selected
-      .zip(guess_colors)
-      .map { |code, guess| compare_guess(code_selected, code, guess) }
+  def print_result(type)
+    if type == 1
+      puts @turns.positive? ? COMPUTER_MESSAGES[:winner] : format(COMPUTER_MESSAGES[:loser], turns: TURNS)
+    else
+      puts @turns.positive? ? HUMAN_MESSAGES[:winner] : format(HUMAN_MESSAGES[:loser], turns: TURNS)
+    end
   end
 end
